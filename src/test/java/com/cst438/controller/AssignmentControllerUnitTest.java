@@ -1,7 +1,5 @@
 package com.cst438.controller;
 
-import com.cst438.domain.Assignment;
-import com.cst438.domain.AssignmentRepository;
 import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.GradeDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +27,6 @@ public class AssignmentControllerUnitTest {
     @Autowired
     MockMvc mvc;
 
-    @Autowired
-    AssignmentRepository assignmentRepository;
 
     @Test
     public void createAssignment() throws Exception {
