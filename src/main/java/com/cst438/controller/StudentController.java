@@ -2,6 +2,8 @@ package com.cst438.controller;
 
 import com.cst438.domain.*;
 import com.cst438.dto.EnrollmentDTO;
+import com.cst438.service.GradebookServiceProxy;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +33,9 @@ public class StudentController {
 
     @Autowired
     EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    GradebookServiceProxy gradebookService;
 
 
     // studentId will be temporary until Login security is implemented
@@ -134,8 +139,9 @@ public class StudentController {
                 e.getSection().getTimes(), e.getSection().getCourse().getCredits(), e.getSection().getTerm().getYear(),
                 e.getSection().getTerm().getSemester());
 
+        
+        gradebookService.enrollInCourse(enrollmentDTO);
         return enrollmentDTO;
-
     }
 
     // student drops a course
@@ -157,6 +163,7 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot drop course after the drop deadline");
         }
         
+        gradebookService.dropCourse(enrollmentId);
         enrollmentRepository.deleteById(enrollmentId);
     }
 }
