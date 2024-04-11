@@ -76,8 +76,6 @@ public class GradebookServiceProxy {
 
     @RabbitListener(queues = "registrar_service")
     public void receiveFromGradebook(String message)  {
-         // TODO implement this message -- Possibly Done**
-         // This part was copied from the example provided in the lecture - Anthony
          try {
             System.out.println("receive from Gradebook " + message);
             String[] parts = message.split(" ", 2);
