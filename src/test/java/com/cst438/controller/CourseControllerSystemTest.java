@@ -6,15 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SectionControllerSystemTest {
+public class CourseControllerSystemTest {
 
     public static final String CHROME_DRIVER_FILE_LOCATION =
             "C:/chromedriver-win32/chromedriver.exe";
@@ -54,11 +51,13 @@ public class SectionControllerSystemTest {
     }
 
     @Test
-    public void systemTestAddSection() throws Exception {
-        // add a section for cst499 Spring 2024 term
-        // verify section shows on the list of sections for Spring 2024
+    public void systemTestAddSectionBadCourse() throws Exception {
+        // attempt to add a section to course cst599 2024, Spring
+        // fails because course does not exist
+        // change courseId to cst499 and try again
+        // verify success
         // delete the section
-        // verify the section is gone
+
 
 
         // click link to navigate to Sections
@@ -66,15 +65,14 @@ public class SectionControllerSystemTest {
         we.click();
         Thread.sleep(SLEEP_DURATION);
 
-        // enter cst499, 2024, Spring and click search sections
-        driver.findElement(By.id("scourseId")).sendKeys("cst499");
+        // enter cst, 2024, Spring and click search sections
+        driver.findElement(By.id("scourseId")).sendKeys("cst");
         driver.findElement(By.id("syear")).sendKeys("2024");
         driver.findElement(By.id("ssemester")).sendKeys("Spring");
         driver.findElement(By.id("search")).click();
         Thread.sleep(SLEEP_DURATION);
 
         // verify that cst499 is not in the list of sections
-        // if it exists, then delete it
         // Selenium throws NoSuchElementException when the element is not found
         try {
             while (true) {
@@ -93,7 +91,7 @@ public class SectionControllerSystemTest {
                 Thread.sleep(SLEEP_DURATION);
             }
         } catch (NoSuchElementException e) {
-           // do nothing, continue with test
+            // do nothing, continue with test
         }
 
         // find and click button to add a section
@@ -101,8 +99,8 @@ public class SectionControllerSystemTest {
         Thread.sleep(SLEEP_DURATION);
 
         // enter data
-        //  courseId: cst499,
-        driver.findElement(By.id("ecourseId")).sendKeys("cst499");
+        //  courseId: cst599
+        driver.findElement(By.id("ecourseId")).sendKeys("cst599");
         //  secId: 1,
         driver.findElement(By.id("esecId")).sendKeys("1");
         //  year:2024,
@@ -121,32 +119,43 @@ public class SectionControllerSystemTest {
         driver.findElement(By.id("save")).click();
         Thread.sleep(SLEEP_DURATION);
 
-        String message = driver.findElement(By.id("addMessage")).getText();
+        WebElement msg = driver.findElement(By.id("addMessage"));
+        String message = msg.getText();
+        assertEquals("course not found cst599", message);
+
+        // clear the courseId field and enter cst499
+        WebElement courseId = driver.findElement(By.id("ecourseId"));
+        courseId.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
+        Thread.sleep(SLEEP_DURATION);
+        courseId.sendKeys("cst499");
+        driver.findElement(By.id("save")).click();
+        Thread.sleep(SLEEP_DURATION);
+
+        message = driver.findElement(By.id("addMessage")).getText();
         assertTrue(message.startsWith("section added"));
 
         // close the dialog
         driver.findElement(By.id("close")).click();
+        Thread.sleep(SLEEP_DURATION);
 
-        // verify that new Section shows up on Sections list
-        // find the row for cst499
-        WebElement row499 = driver.findElement(By.xpath("//tr[td='cst499']"));
-        List<WebElement> buttons = row499.findElements(By.tagName("button"));
+        WebElement row = driver.findElement(By.xpath("//tr[td='cst499']"));
+        assertNotNull(row);
+        // find the delete button on the row from prior statement.
+        List<WebElement> deleteButtons = row.findElements(By.tagName("button"));
         // delete is the second button
-        assertEquals(2, buttons.size());
-        buttons.get(1).click();
+        assertEquals(2, deleteButtons.size());
+        deleteButtons.get(1).click();
         Thread.sleep(SLEEP_DURATION);
         // find the YES to confirm button
         List<WebElement> confirmButtons = driver
                 .findElement(By.className("react-confirm-alert-button-group"))
                 .findElements(By.tagName("button"));
-        assertEquals(2, confirmButtons.size());
+        assertEquals(2,confirmButtons.size());
         confirmButtons.get(0).click();
         Thread.sleep(SLEEP_DURATION);
 
-        // verify that Section list is now empty
+        // verify that Section list is empty
         assertThrows(NoSuchElementException.class, () ->
                 driver.findElement(By.xpath("//tr[td='cst499']")));
-
     }
-
 }
