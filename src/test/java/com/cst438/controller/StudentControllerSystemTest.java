@@ -56,7 +56,12 @@ public class StudentControllerSystemTest {
 
     @Test
     public void testStudentEnrollment() throws Exception {
+        // Ensure user is of type STUDENT before running
+
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement link = driver.findElement(By.xpath("//a[@href='/addCourse']"));
+        link.click();
 
         // Wait for the sections to load and be visible on the page
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h3[contains(text(), 'Sections')]")));

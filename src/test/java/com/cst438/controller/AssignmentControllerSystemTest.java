@@ -54,6 +54,8 @@ public class AssignmentControllerSystemTest {
 
     @Test
     public void testAddAssignment() throws InterruptedException {
+        // Ensure user is of type INSTRUCTOR before running
+
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         // Input year and semester data

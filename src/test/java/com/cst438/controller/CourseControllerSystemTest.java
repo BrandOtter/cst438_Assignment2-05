@@ -58,6 +58,8 @@ public class CourseControllerSystemTest {
         // verify success
         // delete the section
 
+        // Ensure that the current user is of type ADMIN before running
+
 
 
         // click link to navigate to Sections

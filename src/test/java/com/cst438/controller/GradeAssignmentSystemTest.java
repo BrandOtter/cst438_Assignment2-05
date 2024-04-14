@@ -59,6 +59,9 @@ public class GradeAssignmentSystemTest {
 
     @Test
     public void testGradeAssignment() throws Exception {
+
+        // Ensure user is of type INSTRUCTOR before running
+
         // Define constants for sleep duration and the base URL of your application
         final long SLEEP_DURATION = 2000; // Adjust as needed
 
@@ -136,5 +139,6 @@ public class GradeAssignmentSystemTest {
 
         // Accept the alert that confirms the scores have been updated
         wait.until(ExpectedConditions.alertIsPresent()).accept();
+        Thread.sleep(SLEEP_DURATION);
     }
 }
