@@ -4,9 +4,11 @@ import com.cst438.domain.*;
 import com.cst438.dto.EnrollmentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +17,6 @@ import java.util.Optional;
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 public class StudentController {
-
 
     @Autowired
     CourseRepository courseRepository;
@@ -32,14 +33,17 @@ public class StudentController {
     @Autowired
     EnrollmentRepository enrollmentRepository;
 
-
     // studentId will be temporary until Login security is implemented
     //example URL  /transcript?studentId=19803
 
     // student gets transcript showing list of all enrollments
     @GetMapping("/transcripts")
-    public List<EnrollmentDTO> getTranscript(@RequestParam("studentId") int studentId) {
-        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdOrderByTermId(studentId);
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
+    public List<EnrollmentDTO> getTranscript(Principal principal) {
+
+        User student = userRepository.findByEmail(principal.getName());
+
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdOrderByTermId(student.getId());
 
         if(enrollments == null){
             throw  new ResponseStatusException( HttpStatus.NOT_FOUND, "student ID is invalid");
