@@ -152,7 +152,7 @@ public class AssignmentController {
     @GetMapping("/assignments/{assignmentId}/grades")
     public List<GradeDTO> getAssignmentGrades(@PathVariable("assignmentId") int assignmentId) {
 
-        //TODO: Check for instructor status
+        // TODO: Check for instructor status
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
@@ -165,8 +165,17 @@ public class AssignmentController {
         for (Enrollment enrollment : enrollments) {
             Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(enrollment.getEnrollmentId(), assignmentId);
 
-            gradesDtoList.add(new GradeDTO(grade.getGradeId(), grade.getEnrollment().getUser().getName(),
-                    grade.getEnrollment().getUser().getEmail(), assignment.getTitle(), enrollment.getSection().getCourse().getCourseId(),
+            // Create a new Grade object if it does not exist and add it to the repository.
+            if (grade == null) {
+                grade = new Grade();
+                grade.setAssignment(assignment);
+                grade.setEnrollment(enrollment);
+                grade.setScore(0);
+                gradeRepository.save(grade);
+            }
+
+            gradesDtoList.add(new GradeDTO(grade.getGradeId(), enrollment.getUser().getName(),
+                    enrollment.getUser().getEmail(), assignment.getTitle(), enrollment.getSection().getCourse().getCourseId(),
                     enrollment.getSection().getSecId(), grade.getScore()));
         }
 
