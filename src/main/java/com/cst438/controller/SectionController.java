@@ -190,7 +190,9 @@ public class SectionController {
         return dto_list;
     }
 
+    // get Sections for a Student
     @GetMapping("/sections/open")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
     public List<SectionDTO> getOpenSectionsForEnrollment() {
 
         List<Section> sections = sectionRepository.findByOpenOrderByCourseIdSectionId();

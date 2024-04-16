@@ -6,6 +6,7 @@ import com.cst438.dto.AssignmentStudentDTO;
 import com.cst438.dto.EnrollmentDTO;
 import com.cst438.dto.GradeDTO;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
@@ -206,8 +207,8 @@ public class AssignmentController {
 
     // student lists their assignments/grades for an enrollment ordered by due date
     // student must be enrolled in the section
-
     @GetMapping("/assignments")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
     public List<AssignmentStudentDTO> getStudentAssignments(
             @RequestParam("studentId") int studentId,
             @RequestParam("year") int year,
