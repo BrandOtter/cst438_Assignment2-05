@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,15 +37,15 @@ public class SectionController {
     public SectionDTO addSection(@RequestBody SectionDTO section) {
 
         Course course = courseRepository.findById(section.courseId()).orElse(null);
-        if (course == null ){
-            throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "course not found "+section.courseId());
+        if (course == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "course not found " + section.courseId());
         }
         Section s = new Section();
         s.setCourse(course);
 
         Term term = termRepository.findByYearAndSemester(section.year(), section.semester());
         if (term == null) {
-            throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "year, semester invalid ");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "year, semester invalid ");
         }
         s.setTerm(term);
 
@@ -54,7 +55,7 @@ public class SectionController {
         s.setTimes(section.times());
 
         User instructor = null;
-        if (section.instructorEmail()==null || section.instructorEmail().equals("")) {
+        if (section.instructorEmail() == null || section.instructorEmail().equals("")) {
             s.setInstructor_email("");
         } else {
             instructor = userRepository.findByEmail(section.instructorEmail());
@@ -75,8 +76,8 @@ public class SectionController {
                 s.getBuilding(),
                 s.getRoom(),
                 s.getTimes(),
-                (instructor!=null) ? instructor.getName() : "",
-                (instructor!=null) ? instructor.getEmail() : ""
+                (instructor != null) ? instructor.getName() : "",
+                (instructor != null) ? instructor.getEmail() : ""
         );
     }
 
@@ -87,8 +88,8 @@ public class SectionController {
 
         // can only change instructor email, sec_id, building, room, times, start, end dates
         Section s = sectionRepository.findById(section.secNo()).orElse(null);
-        if (s==null) {
-            throw  new ResponseStatusException( HttpStatus.NOT_FOUND, "section not found "+section.secNo());
+        if (s == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "section not found " + section.secNo());
         }
         s.setSecId(section.secId());
         s.setBuilding(section.building());
@@ -96,7 +97,7 @@ public class SectionController {
         s.setTimes(section.times());
 
         User instructor = null;
-        if (section.instructorEmail()==null || section.instructorEmail().equals("")) {
+        if (section.instructorEmail() == null || section.instructorEmail().equals("")) {
             s.setInstructor_email("");
         } else {
             instructor = userRepository.findByEmail(section.instructorEmail());
@@ -125,16 +126,16 @@ public class SectionController {
     @GetMapping("/courses/{courseId}/sections")
     public List<SectionDTO> getSections(
             @PathVariable("courseId") String courseId,
-            @RequestParam("year") int year ,
-            @RequestParam("semester") String semester )  {
+            @RequestParam("year") int year,
+            @RequestParam("semester") String semester) {
 
 
-        List<Section> sections = sectionRepository.findByLikeCourseIdAndYearAndSemester(courseId+"%", year, semester);
+        List<Section> sections = sectionRepository.findByLikeCourseIdAndYearAndSemester(courseId + "%", year, semester);
 
         List<SectionDTO> dto_list = new ArrayList<>();
         for (Section s : sections) {
             User instructor = null;
-            if (s.getInstructorEmail()!=null) {
+            if (s.getInstructorEmail() != null) {
                 instructor = userRepository.findByEmail(s.getInstructorEmail());
             }
             dto_list.add(new SectionDTO(
@@ -147,8 +148,8 @@ public class SectionController {
                     s.getBuilding(),
                     s.getRoom(),
                     s.getTimes(),
-                    (instructor!=null) ? instructor.getName() : "",
-                    (instructor!=null) ? instructor.getEmail() : ""
+                    (instructor != null) ? instructor.getName() : "",
+                    (instructor != null) ? instructor.getEmail() : ""
             ));
 
         }
@@ -159,18 +160,19 @@ public class SectionController {
     @GetMapping("/sections")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<SectionDTO> getSectionsForInstructor(
-            @RequestParam("year") int year ,
+            @RequestParam("year") int year,
             @RequestParam("semester") String semester,
-            Principal principal)  {
+            Principal principal) {
 
         String instructorEmail = principal.getName();
+        System.out.println("Instructor is " + instructorEmail);
 
         List<Section> sections = sectionRepository.findByInstructorEmailAndYearAndSemester(instructorEmail, year, semester);
 
         List<SectionDTO> dto_list = new ArrayList<>();
         for (Section s : sections) {
             User instructor = null;
-            if (s.getInstructorEmail()!=null) {
+            if (s.getInstructorEmail() != null) {
                 instructor = userRepository.findByEmail(s.getInstructorEmail());
             }
             dto_list.add(new SectionDTO(
@@ -183,8 +185,8 @@ public class SectionController {
                     s.getBuilding(),
                     s.getRoom(),
                     s.getTimes(),
-                    (instructor!=null) ? instructor.getName() : "",
-                    (instructor!=null) ? instructor.getEmail() : ""
+                    (instructor != null) ? instructor.getName() : "",
+                    (instructor != null) ? instructor.getEmail() : ""
             ));
         }
         return dto_list;
@@ -194,13 +196,14 @@ public class SectionController {
     @GetMapping("/sections/open")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
     public List<SectionDTO> getOpenSectionsForEnrollment() {
-
+        System.out.println("Current date: " + LocalDate.now());  // Log current date
         List<Section> sections = sectionRepository.findByOpenOrderByCourseIdSectionId();
+        System.out.println("Open sections count: " + sections.size());  // Log how many sections were found
 
         List<SectionDTO> dlist = new ArrayList<>();
         for (Section s : sections) {
             User instructor = userRepository.findByEmail(s.getInstructorEmail());
-            dlist.add( new SectionDTO(
+            dlist.add(new SectionDTO(
                     s.getSectionNo(),
                     s.getTerm().getYear(),
                     s.getTerm().getSemester(),
@@ -210,8 +213,8 @@ public class SectionController {
                     s.getBuilding(),
                     s.getRoom(),
                     s.getTimes(),
-                    (instructor!=null) ? instructor.getName() : "",
-                    (instructor!=null) ? instructor.getEmail() : ""
+                    (instructor != null) ? instructor.getName() : "",
+                    (instructor != null) ? instructor.getEmail() : ""
             ));
         }
         return dlist;

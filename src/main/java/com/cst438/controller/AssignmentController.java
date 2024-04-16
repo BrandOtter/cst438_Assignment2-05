@@ -44,10 +44,9 @@ public class AssignmentController {
     // instructor lists assignments for a section.  Assignments ordered by due date.
     // logged in user must be the instructor for the section
     @GetMapping("/sections/{secNo}/assignments")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<AssignmentDTO> getAssignments(
             @PathVariable("secNo") int secNo) {
-
-        //TODO: Check for instructor status
 
         List<Assignment> assignments = assignmentRepository.findBySectionNoOrderByDueDate(secNo);
 
@@ -109,8 +108,6 @@ public class AssignmentController {
     @PutMapping("/assignments")
     public AssignmentDTO updateAssignment(@RequestBody AssignmentDTO dto) {
 
-        //TODO: Check for instructor status
-
         int assignmentId = dto.assignmentId();
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
@@ -136,13 +133,15 @@ public class AssignmentController {
     @DeleteMapping("/assignments/{assignmentId}")
     public void deleteAssignment(@PathVariable("assignmentId") int assignmentId) {
 
-        //TODO: Check for instructor status
-
         Optional<Assignment> assignmentOpt = assignmentRepository.findById(assignmentId);
-
         if (assignmentOpt.isEmpty()) {
             return;
         }
+
+        // Get all the grades for the assignment.
+        List<Grade> grades = gradeRepository.findByAssignmentId(assignmentId);
+
+        gradeRepository.deleteAll(grades);
 
         assignmentRepository.deleteById(assignmentId);
 
